@@ -1,4 +1,5 @@
 import functools
+from types import NoneType
 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
@@ -47,19 +48,33 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        user = db.execute(
+        # database からユーザー情報を取得する方法
+        # もしユーサーが存在しないならば、None が返ってくる
+        '''
+        hoge = db.execute(
+        
             'SELECT * FROM user WHERE username = ?', (username,)
         ).fetchone()
+        '''
+        user = None
+        
+        # 次の行にもしユーザーが存在しなかった場合、error に  'Incorrect username.' と代入するコードを書こう
 
-        if user is None:
-            error = 'Incorrect username.'
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
 
-        if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            return redirect(url_for('index'))
+
+        try:
+            if not check_password_hash(user['password'], password):
+                error = 'Incorrect password.'
+        except TypeError:
+            pass
+
+        try:
+            if error is None:
+                session.clear()
+                session['user_id'] = user['id']
+                return redirect(url_for('index'))
+        except TypeError:
+            error = "user not found."
 
         flash(error)
 
