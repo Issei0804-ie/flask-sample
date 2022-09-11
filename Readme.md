@@ -9,5 +9,5 @@ python3 -m flask init-db
 
 ## 実行方法
 ```
-python -m flask run
+python3 -m flask run
 ```
